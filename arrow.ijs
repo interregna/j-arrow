@@ -1981,7 +1981,21 @@ removeObject readerPathPtr
 tablePtr
 }}
 
-readParquetSchema=: (readParquet readFileSchema)
+NB. readParquetSchema=: (readParquet readFileSchema)
+readParquetSchema=: {{
+NB. use gparquet_arrow_file_reader_get_schema instead of reading entire file into memory first
+'filepath'=. y
+'File does not exist or is not permissioned for read.' assert fexist (jpath filepath)
+e=. < mema 4
+readerPathPtr=. ptr gparquet_arrow_file_reader_new_path (jpath filepath);<e
+schemaPt=. ptr gparquet_arrow_file_reader_get_schema readerPathPtr;<e
+removeObject readerPathPtr
+memf > e
+res=. getSchemaFields schemaPt
+removeObject schemaPt
+res
+}}
+
 printParquetSchema=: (readParquet printFileSchema)
 readParquetData=: (readParquet readFileData)
 readParquetTable=: (readParquet readFileTable)
